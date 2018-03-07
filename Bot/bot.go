@@ -8,6 +8,7 @@ import (
 	"net/textproto"
 	"strings"
 	"time"
+	"log"
 )
 
 type Bot struct {
@@ -52,20 +53,26 @@ func RunBot(channelName string, voteOptionA string, voteOptionB string) {
 	defer ircbot.conn.Close()
 	reader := bufio.NewReader(ircbot.conn)
 	tp := textproto.NewReader(reader)
-	strCounter := 0
+	voteOptionACount := 0
+	voteOptionBCount := 0
 	for {
 		line, err := tp.ReadLine()
 		if err != nil {
+			log.Fatal(err)
 			break // break loop on errors
 		}
 		//fmt.Println(line)
 		if strings.Contains(line, "PING") {
 			pongdata := strings.Split(line, "PING ")
 			fmt.Fprintf(ircbot.conn, "PONG %s\r\n", pongdata[1])
-		} else if strings.Contains(line, voteOptionA) {
-			strCounter++
-			fmt.Println(strCounter)
+		} else if strings.Contains(line, voteOptionA) && !strings.Contains(line, voteOptionB) {
+			voteOptionACount++
+			fmt.Println(voteOptionA + ":", voteOptionACount, "\n" + voteOptionB + ":", voteOptionBCount)
+		} else if strings.Contains(line, voteOptionB) && !strings.Contains(line, voteOptionA){
+			voteOptionBCount++
+			fmt.Println(voteOptionA + ":", voteOptionACount, "\n" + voteOptionB + ":", voteOptionBCount)
 		}
+
 	}
 
 }

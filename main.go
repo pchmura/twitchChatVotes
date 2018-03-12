@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	//"github.com/pchmura/twitchChatVotes/Bot"
 	"log"
 	"net/http"
@@ -16,9 +17,9 @@ var upgrader = websocket.Upgrader{
 }
 
 type Message struct {
-	Email		string `json:"email"`
-	Username	string `json:"username"`
-	Message		string `json:"message"`
+	Data		string `json:"data"`
+	Type		string `json:"type"`
+
 }
 
 func main() {
@@ -27,7 +28,7 @@ func main() {
 	 //bot.RunBot("#ninja", "ninjaCRINJA", "ninjaS")
 	fs := http.FileServer(http.Dir("/twitch-chat-votes/public/"))
 	http.Handle("/", fs)
-	http.HandleFunc("/ws", handleConnections)
+	http.HandleFunc("/ws", handleBasicWS)
 
 	go handleMessages()
 
@@ -36,6 +37,36 @@ func main() {
 	if err != nil {
 		log.Fatal("Listenandserve error: ", err)
 	}
+}
+
+func handleBasicWS(w http.ResponseWriter, r *http.Request){
+	var conn, _ = upgrader.Upgrade(w,r,nil)
+	go func(conn *websocket.Conn) {
+
+		for {
+			m := Message{}
+			err := conn.ReadJSON(&m)
+			if err != nil {
+				fmt.Println("Error reading JSON", err)
+			}
+
+			fmt.Printf("Message: %#v\n", m)
+
+			switch m.Type {
+			case "testMessage":
+				fmt.Println("test")
+			case "testMessage2":
+				fmt.Println("test2")
+			default:
+				// freebsd, openbsd,
+				// plan9, windows...
+				fmt.Println("other")
+			}
+
+		}
+		msg := Message{Data:"pls work", Type:"test"}
+		conn.WriteJSON(msg)
+	}(conn)
 }
 
 func handleConnections(w http.ResponseWriter, r *http.Request){
@@ -60,6 +91,8 @@ func handleConnections(w http.ResponseWriter, r *http.Request){
 }
 
 func handleMessages(){
+
+
 	for{
 		msg := <- broadcast
 

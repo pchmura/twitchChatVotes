@@ -8,9 +8,9 @@ class App extends Component {
       this.state = {
         message:"this shouldnt be here",
         ws: null,
-        channel: "",
-        option1: "",
-        option2: "",
+        channel: "#",
+        option1: "test",
+        option2: "more tests",
         emote1: "",
         emote2: "",
         duration: 0,
@@ -29,6 +29,9 @@ class App extends Component {
     
     ws.addEventListener('message', (e) =>{
       let message = JSON.parse(e.data);
+      if("votes1" in message){
+        this.setState({votes1:message.votes1, votes2:message.votes2})
+      }
       console.log(message);
       this.setState({message:message.data});
     })
@@ -38,8 +41,8 @@ class App extends Component {
   sendMessage(){
     this.state.ws.send(
       JSON.stringify({
-          data: "pls work some more fam",
-          type: "testMessage"
+        control: "testMessage",
+        X: {data:"this test message 1"}
       }
   ));
   }
@@ -47,8 +50,8 @@ class App extends Component {
   sendMessage2(){
     this.state.ws.send(
       JSON.stringify({
-          data: "pls work some more fam",
-          type: "testMessage2"
+          control: "testMessage2",
+          X: {data:"this test message 2"}
       }
   ));
   }
@@ -64,8 +67,12 @@ class App extends Component {
   }
 
   sendFormData(event){
+
+    const picked = (({channel, option1, option2, emote1, emote2, duration, votes1, votes2}) => ({channel, option1, option2, emote1, emote2, duration, votes1, votes2}))(this.state);
+
     
-    console.log(this.state)
+    console.log(picked)
+    this.state.ws.send(JSON.stringify({control:"formData", X:picked}));
     event.preventDefault();
   }
 
@@ -109,6 +116,9 @@ class App extends Component {
           <br/>
           <input type="submit" value="Submit" />
         </form>
+
+        <p>Votes for A: {this.state.votes1}</p>
+        <p>Votes for B: {this.state.votes2}</p>
         </div>
       </div>
     );

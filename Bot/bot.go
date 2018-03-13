@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 	"log"
+	"github.com/gorilla/websocket"
 )
 
 type Bot struct {
@@ -18,6 +19,11 @@ type Bot struct {
 	oauth   string
 	channel string
 	conn    net.Conn
+}
+
+type VoteData struct {
+	Votes1		int `json:"votes1"`
+	Votes2		int `json:"votes2"`
 }
 
 func NewBot(channelName string) *Bot {
@@ -43,7 +49,7 @@ func (bot *Bot) Connect() {
 	fmt.Printf("Connected to IRC server %s\n", bot.server)
 }
 
-func RunBot(channelName string, voteOptionA string, voteOptionB string) {
+func RunBot(channelName string, voteOptionA string, voteOptionB string, duration int, conn *websocket.Conn) {
 	ircbot := NewBot(channelName)
 	ircbot.Connect()
 	fmt.Fprintf(ircbot.conn, "USER %s 8 * :%s\r\n", ircbot.nick, ircbot.nick)
@@ -53,8 +59,8 @@ func RunBot(channelName string, voteOptionA string, voteOptionB string) {
 	defer ircbot.conn.Close()
 	reader := bufio.NewReader(ircbot.conn)
 	tp := textproto.NewReader(reader)
-	voteOptionACount := 0
-	voteOptionBCount := 0
+	var voteData = VoteData{0, 0}
+	// add a ticker somewhere here
 	for {
 		line, err := tp.ReadLine()
 		if err != nil {
@@ -66,12 +72,16 @@ func RunBot(channelName string, voteOptionA string, voteOptionB string) {
 			pongdata := strings.Split(line, "PING ")
 			fmt.Fprintf(ircbot.conn, "PONG %s\r\n", pongdata[1])
 		} else if strings.Contains(line, voteOptionA) && !strings.Contains(line, voteOptionB) {
-			voteOptionACount++
-			fmt.Println(voteOptionA + ":", voteOptionACount, "\n" + voteOptionB + ":", voteOptionBCount)
+			voteData.Votes1++
+			conn.WriteJSON(voteData)
+			fmt.Println(voteOptionA + ":", voteData.Votes1, "\n" + voteOptionB + ":", voteData.Votes2)
 		} else if strings.Contains(line, voteOptionB) && !strings.Contains(line, voteOptionA){
-			voteOptionBCount++
-			fmt.Println(voteOptionA + ":", voteOptionACount, "\n" + voteOptionB + ":", voteOptionBCount)
+			voteData.Votes2++
+			conn.WriteJSON(voteData)
+			fmt.Println(voteOptionA + ":", voteData.Votes1, "\n" + voteOptionB + ":", voteData.Votes2)
 		}
+
+
 
 	}
 

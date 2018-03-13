@@ -1,8 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	//"github.com/pchmura/twitchChatVotes/Bot"
+	"github.com/twitchChatVotes/Bot"
 	"log"
 	"net/http"
 	"github.com/gorilla/websocket"
@@ -19,7 +20,22 @@ var upgrader = websocket.Upgrader{
 type Message struct {
 	Data		string `json:"data"`
 	Type		string `json:"type"`
+}
 
+type FormData struct {
+	Channel		string `json:"channel"`
+	Option1		string `json:"option1"`
+	Option2		string `json:"option2"`
+	Emote1		string `json:"emote1"`
+	Emote2		string `json:"emote2"`
+	Duration	int `json:"duration"`
+	Votes1		int `json:"votes1"`
+	Votes2  	int `json:"votes2"`
+}
+
+type Messages struct {
+	Control string `json:"control"`
+	X json.RawMessage
 }
 
 func main() {
@@ -44,25 +60,34 @@ func handleBasicWS(w http.ResponseWriter, r *http.Request){
 	go func(conn *websocket.Conn) {
 
 		for {
-			m := Message{}
+			var m Messages
 			err := conn.ReadJSON(&m)
 			if err != nil {
-				fmt.Println("Error reading JSON", err)
+				fmt.Println("Error durning reading:", err)
+				conn.Close()
+				break
+
 			}
 
 			fmt.Printf("Message: %#v\n", m)
-
-			switch m.Type {
+			switch m.Control {
+			case "formData":
+				fmt.Println("formData")
+				var formData FormData
+				if err := json.Unmarshal([]byte(m.X), &formData); err != nil {
+					// handle error
+					fmt.Println("error durning unmarshaling: ", err)
+				}
+				// do something
+				fmt.Printf("%+v\n", formData)
+				go bot.RunBot(formData.Channel, formData.Emote1, formData.Emote2, formData.Duration, conn)
 			case "testMessage":
 				fmt.Println("test")
 			case "testMessage2":
 				fmt.Println("test2")
 			default:
-				// freebsd, openbsd,
-				// plan9, windows...
 				fmt.Println("other")
 			}
-
 		}
 		msg := Message{Data:"pls work", Type:"test"}
 		conn.WriteJSON(msg)

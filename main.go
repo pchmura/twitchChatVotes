@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/twitchChatVotes/Bot"
+	"./Bot"
 	"log"
 	"net/http"
 	"github.com/gorilla/websocket"

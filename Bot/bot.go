@@ -3,7 +3,7 @@ package bot
 import (
 	"bufio"
 	"fmt"
-	"github.com/pchmura/twitchChatVotes/Config"
+	"../Config"
 	"net"
 	"net/textproto"
 	"strings"
@@ -30,9 +30,9 @@ func NewBot(channelName string) *Bot {
 	return &Bot{
 		server:  "irc.chat.twitch.tv",
 		port:    "6667",
-		nick:    "sentimentBot", //Change to your Twitch username
+		nick:    Config.NICK,
 		oauth:   Config.OAUTH,
-		channel: channelName, //Change to your channel
+		channel: channelName,
 		conn:    nil,
 	}
 }

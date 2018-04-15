@@ -25,7 +25,7 @@ class App extends Component {
     }
 
   componentDidMount(){
-    let ws = new WebSocket('ws://34.209.110.250:8000/ws');
+    let ws = new WebSocket('ws://ec2-34-209-110-250.us-west-2.compute.amazonaws.com:8000/ws');
     
     ws.addEventListener('message', (e) =>{
       let message = JSON.parse(e.data);

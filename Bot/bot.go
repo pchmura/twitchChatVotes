@@ -49,7 +49,7 @@ func (bot *Bot) Connect() {
 	fmt.Printf("Connected to IRC server %s\n", bot.server)
 }
 
-func RunBot(channelName string, voteOptionA string, voteOptionB string, duration int, conn *websocket.Conn) {
+func RunBot(channelName string, voteOptionA string, voteOptionB string, duration int, delay int, conn *websocket.Conn) {
 	ircbot := NewBot(channelName)
 	ircbot.Connect()
 	fmt.Fprintf(ircbot.conn, "USER %s 8 * :%s\r\n", ircbot.nick, ircbot.nick)

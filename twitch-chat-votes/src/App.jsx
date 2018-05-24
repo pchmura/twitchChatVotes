@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import LiveChart from './containers/liveChart';
 
 class App extends Component {
     constructor(props){
@@ -14,6 +15,7 @@ class App extends Component {
         emote1: "",
         emote2: "",
         duration: 0,
+        delay: 0,
         votes1: 0,
         votes2: 0
       }
@@ -68,9 +70,7 @@ class App extends Component {
 
   sendFormData(event){
 
-    const picked = (({channel, option1, option2, emote1, emote2, duration, votes1, votes2}) => ({channel, option1, option2, emote1, emote2, duration, votes1, votes2}))(this.state);
-
-    
+    const picked = (({channel, option1, option2, emote1, emote2, duration, delay, votes1, votes2}) => ({channel: channel.toLowerCase(), option1, option2, emote1, emote2, duration, delay, votes1, votes2}))(this.state);
     console.log(picked)
     this.state.ws.send(JSON.stringify({control:"formData", X:picked}));
     event.preventDefault();
@@ -120,6 +120,11 @@ class App extends Component {
         <p>Votes for A: {this.state.votes1}</p>
         <p>Votes for B: {this.state.votes2}</p>
         </div>
+
+        <LiveChart chartData={{
+            data: [this.state.votes1, this.state.votes2], 
+            emotes: [this.state.emote1, this.state.emote2],
+            }}/>
       </div>
     );
   }

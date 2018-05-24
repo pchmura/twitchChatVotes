@@ -29,6 +29,7 @@ type FormData struct {
 	Emote1		string `json:"emote1"`
 	Emote2		string `json:"emote2"`
 	Duration	int `json:"duration"`
+	Delay		int `json:"delay"`
 	Votes1		int `json:"votes1"`
 	Votes2  	int `json:"votes2"`
 }
@@ -80,7 +81,7 @@ func handleBasicWS(w http.ResponseWriter, r *http.Request){
 				}
 				// do something
 				fmt.Printf("%+v\n", formData)
-				go bot.RunBot(formData.Channel, formData.Emote1, formData.Emote2, formData.Duration, conn)
+				go bot.RunBot(formData.Channel, formData.Emote1, formData.Emote2, formData.Duration, formData.Delay, conn)
 			case "testMessage":
 				fmt.Println("test")
 			case "testMessage2":
